@@ -8,9 +8,11 @@
 
 
 
-unsigned short x;
-unsigned int xy_Toggle;
-unsigned int startStop_Toggle;
+unsigned short value;
+unsigned int x;
+unsigned int y;
+signed int xy_Toggle;
+signed int startStop_Toggle;
 
 
 
@@ -20,12 +22,21 @@ void main(void) {
   // Our specific E-clock speed was 4 MHz
   // baud divisor = 4000000/(16 * 19200) = 13.02.. <- less than 5% error off nearest whole number
   SCI_Init(19200);
+  
+  // The next six assignment statements configure the Timer Input Capture                                                              
+  TSCR1 = 0x90;  
+  TSCR2 = 0x00;                     
+  TIOS = 0xFE;                  
+  PERT = 0x01;     
+  TCTL3 = 0x00;    
+  TCTL4 = 0x02;    
+  TIE = 0x01;   //Timer Interrupt Enable
  
   // ADC Channel configuration
   ATDCTL1 = 0x4F;		// set for 12-bit resolution (1001111) 
 	ATDCTL3 = 0x88;		// right justified, one sample per sequence
 	ATDCTL4 = 0x01;		// prescaler = 1; 4MHz / (2 * (1 + 1)) == 1MHz
-	ATDCTL5 = 0x26;		// continuous conversion on channel 6 (AN6)
+	ATDCTL5 = 0x25;		// continuous conversion on channel 6 (AN6)
   
   //Configure on board LED as output, we will use this to show user start/stop state, on = stop, off = measuring/start
   DDRJ = 0x01; 
@@ -36,9 +47,12 @@ void main(void) {
   DDRP = 0x0F;
   
   
-  // Configure PAD0-PAD7 Pin
+  // Configure PAD0-PAD3 Pin
   // Access using PT1AD to output
   DDR1AD = 0x0F;
+  
+  // Configure pull up resistor for pin PAD4
+  PER1AD = 0x10;
   
   // Check if serial communication with pc is established
   SCI_OutString("Connection with PC has been established");
@@ -60,13 +74,30 @@ void main(void) {
   
   PTP = 0b00000000;
   
+  xy_Toggle == -1;
   
   while(1){
     
-    x = ATDDR0; // store digital value from accelerometer
-
-    SCI_OutUDec(x);
-    SCI_OutChar(CR);
+    if(PTI1AD == 0x00){
+      xy_Toggle *=-1;
+    }
+    
+    if(xy_Toggle == 1){
+ 
+      value = ATDDR0; // store digital value from accelerometer
+      y = getAngleY(value);
+    
+      SCI_OutUDec(y);
+      SCI_OutChar(CR);
+      
+    } else {
+      
+      value = ATDDR0; // store digital value from accelerometer
+      x = getAngleX(value);
+    
+      SCI_OutUDec(x);
+      SCI_OutChar(CR);
+    }
   }
   
   
@@ -77,6 +108,32 @@ void main(void) {
     _FEED_COP(); /* feeds the dog */
   } /* loop forever */
   /* please make sure that you never leave main */
+}
+
+
+// Function for receiving x angle using linear approximation
+int getAngleX(unsigned short x){
+ 
+ float angle;
+ angle = 0.2369*x - 504.6;
+ 
+ if(angle < 0){  
+  angle = angle * -1;
+ }
+ return angle;
+}
+
+
+// Function for receiving y angle using linear approximation
+int getAngleY(unsigned short y){
+ 
+ float angle;
+ angle = 0.2093*y - 420.7;
+ 
+ if(angle < 0){
+  angle = angle * -1;
+ }
+ return angle;
 }
 
 
@@ -132,3 +189,18 @@ void setClk(void){
  CPMUPROT = 1;                  //Protection for clock configuration is reenabled 
   //Note: If you change your clock speed you will need to update delay1ms function to give a 1 ms delay
 }
+
+
+
+/*
+ * This is the Interrupt Service Routine for TIC channel 0 (Code Warrior has predefined the name for you as "Vtimch0"                                                    
+ */           
+interrupt  VectorNumber_Vtimch0 void ISR_Vtimch0(void)
+{
+  unsigned int temp;
+  
+  PTJ ^= 0x01;      //Toggles pin/LED state    
+
+  temp = TC0;       //Refer back to TFFCA, we enabled FastFlagClear, thus by reading the Timer Capture input we automatically clear the flag, allowing another TIC interrupt
+}
+
