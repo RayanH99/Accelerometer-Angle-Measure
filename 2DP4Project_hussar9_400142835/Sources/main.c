@@ -78,7 +78,7 @@ void main(void) {
   
   while(1){
     
-    if(PTI1AD == 0x00){
+    if(PTI1AD == 0x01){
       xy_Toggle *=-1;
     }
     
