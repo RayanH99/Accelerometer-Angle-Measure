@@ -11,6 +11,7 @@
 unsigned short value;
 unsigned int x;
 unsigned int y;
+unsigned int xyCounter;
 signed int xy_Toggle;
 signed int startStop_Toggle;
 
@@ -22,6 +23,25 @@ void setClk(void);
 
 void main(void) {
 
+  /*
+ * The next six assignment statements configure the Timer Input Capture                                                   
+ */           
+  TSCR1 = 0x90;
+  TSCR2 = 0x04;                   
+  TIOS = 0xFC;                   
+  PERT = 0x03;     
+  TCTL3 = 0x00;    
+  TCTL4 = 0x0A;    
+  TIE = 0x03;   //Timer Interrupt Enable        
+  
+	EnableInterrupts; //CodeWarrior's method of enabling interrupts
+ 
+  // ADC Channel configuration
+  ATDCTL1 = 0x4F;		// set for 12-bit resolution (1001111) 
+	ATDCTL3 = 0x88;		// right justified, one sample per sequence
+	ATDCTL4 = 0x01;		// prescaler = 1; 4MHz / (2 * (1 + 1)) == 1MHz
+	ATDCTL5 = 0x25;		// continuous conversion on channel 6 (AN6)
+
   // Set baud rate based on student specifc bus speed(E-clock)
   // Our specific E-clock speed was 4 MHz
   // baud divisor = 4000000/(16 * 19200) = 13.02.. <- less than 5% error off nearest whole number
@@ -30,24 +50,10 @@ void main(void) {
   // Set clock speed
   //setClk();
   
-  // The next six assignment statements configure the Timer Input Capture                                                              
-  TSCR1 = 0x90;  
-  TSCR2 = 0x00;                     
-  TIOS = 0xFE;                  
-  PERT = 0x01;     
-  TCTL3 = 0x00;    
-  TCTL4 = 0x02;    
-  TIE = 0x03;   //Timer Interrupt Enable
- 
-  // ADC Channel configuration
-  ATDCTL1 = 0x4F;		// set for 12-bit resolution (1001111) 
-	ATDCTL3 = 0x88;		// right justified, one sample per sequence
-	ATDCTL4 = 0x01;		// prescaler = 1; 4MHz / (2 * (1 + 1)) == 1MHz
-	ATDCTL5 = 0x25;		// continuous conversion on channel 6 (AN6)
   
-  //Configure on board LED as output, we will use this to show user start/stop state, on = stop, off = measuring/start
+  //Configure on board LED as output, we will use this to show user if measuring x or y values
   DDRJ = 0xFF; 
-  PTJ = 0x00; //start powered off to show that we are currently in the start/measure state
+  PTJ = 0x00; //start powered off to show that we are currently measuring along the x axis
   
   // Configure PP0-PP7 Pin
   // Access using PTP to output
@@ -63,41 +69,39 @@ void main(void) {
   SCI_OutString("Connection with PC has been established");
   SCI_OutChar(CR);
   
-  xy_Toggle == -1;
+  xyCounter = 0;
   
   while(1){
     
     
-    if(xy_Toggle == 1){
-    
-      ATDCTL5 = 0x25; // switch to channel 5 (AN5) for y axis
-      
-      value = ATDDR0; // store digital value from accelerometer
-      y = getAngleY(value);
-    
-      outputAngleBCD(y);
-      SCI_OutUDec(y);
-      SCI_OutChar(CR);
-      
-      delay1ms(150);
-      
-    } else {
-    
+    if(xyCounter % 2 == 0){
+
       ATDCTL5 = 0x26; // switch to channel 6 (AN6) for x axis
       
-      value = ATDDR0; // store digital value from accelerometer
+      value = ATDDR0; // store accelerometer value
       x = getAngleX(value);
     
       outputAngleBCD(x);
       SCI_OutUDec(x);
       SCI_OutChar(CR);
+      //delay1ms(100);   
       
-      delay1ms(150);
+    } else {
+    
+
+                            
+      ATDCTL5 = 0x25; // switch to channel 5 (AN5) for y axis
+      
+      value = ATDDR0; // store accelerometer value
+      y = getAngleY(value);
+    
+      outputAngleBCD(y);
+      SCI_OutUDec(y);
+      SCI_OutChar(CR);
+      //delay1ms(100);
     }
   }
   
-  
-	EnableInterrupts;
 
 
   for(;;) {
@@ -201,12 +205,14 @@ void setClk(void){
  */           
 interrupt  VectorNumber_Vtimch0 void ISR_Vtimch0(void)
 {
-  unsigned int temp;
-  
-  PTJ ^= 0x01;      //Toggles pin/LED state    
-  
-  xy_Toggle *=-1;
-  
-  temp = TC0;       //Refer back to TFFCA, we enabled FastFlagClear, thus by reading the Timer Capture input we automatically clear the flag, allowing another TIC interrupt
-}
 
+  unsigned int temp; //DON'T EDIT THIS
+
+  //xy_Toggle *= -1;
+
+  xyCounter++;
+  
+  PTJ ^= 0x01; 
+
+  temp = TC0;       //Refer back to TFFCA, we enabled FastFlagClear, thus by reading the Timer Capture input we automatically clear the flag, allowing another TIC interrupt
+  }
