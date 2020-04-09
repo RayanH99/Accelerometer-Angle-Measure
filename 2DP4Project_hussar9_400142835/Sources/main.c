@@ -14,6 +14,10 @@ unsigned int y;
 signed int xy_Toggle;
 signed int startStop_Toggle;
 
+// function prototypes
+void outputAngleBCD(unsigned int angle);
+void delay1ms(unsigned int multiple);
+void setClk(void);
 
 
 void main(void) {
@@ -23,6 +27,9 @@ void main(void) {
   // baud divisor = 4000000/(16 * 19200) = 13.02.. <- less than 5% error off nearest whole number
   SCI_Init(19200);
   
+  // Set clock speed
+  //setClk();
+  
   // The next six assignment statements configure the Timer Input Capture                                                              
   TSCR1 = 0x90;  
   TSCR2 = 0x00;                     
@@ -30,7 +37,7 @@ void main(void) {
   PERT = 0x01;     
   TCTL3 = 0x00;    
   TCTL4 = 0x02;    
-  TIE = 0x01;   //Timer Interrupt Enable
+  TIE = 0x03;   //Timer Interrupt Enable
  
   // ADC Channel configuration
   ATDCTL1 = 0x4F;		// set for 12-bit resolution (1001111) 
@@ -39,7 +46,7 @@ void main(void) {
 	ATDCTL5 = 0x25;		// continuous conversion on channel 6 (AN6)
   
   //Configure on board LED as output, we will use this to show user start/stop state, on = stop, off = measuring/start
-  DDRJ = 0x01; 
+  DDRJ = 0xFF; 
   PTJ = 0x00; //start powered off to show that we are currently in the start/measure state
   
   // Configure PP0-PP7 Pin
@@ -50,53 +57,42 @@ void main(void) {
   // Configure PAD0-PAD3 Pin
   // Access using PT1AD to output
   DDR1AD = 0x0F;
-  
-  // Configure pull up resistor for pin PAD4
-  PER1AD = 0x10;
+
   
   // Check if serial communication with pc is established
   SCI_OutString("Connection with PC has been established");
   SCI_OutChar(CR);
   
-  // Lower 4 bits (ones)
-  PT1AD = 0b00000001;
-  PT1AD = 0b00000010;
-  PT1AD = 0b00000100;
-  PT1AD = 0b00001000;
-  
-  PT1AD = 0b00000000;
-  
-  // Upper 4 bits (tens)
-  PTP = 0b00000001;
-  PTP = 0b00000010;
-  PTP = 0b00000100;
-  PTP = 0b00001000;
-  
-  PTP = 0b00000000;
-  
   xy_Toggle == -1;
   
   while(1){
     
-    if(PTI1AD == 0x01){
-      xy_Toggle *=-1;
-    }
     
     if(xy_Toggle == 1){
- 
+    
+      ATDCTL5 = 0x25; // switch to channel 5 (AN5) for y axis
+      
       value = ATDDR0; // store digital value from accelerometer
       y = getAngleY(value);
     
+      outputAngleBCD(y);
       SCI_OutUDec(y);
       SCI_OutChar(CR);
       
+      delay1ms(150);
+      
     } else {
+    
+      ATDCTL5 = 0x26; // switch to channel 6 (AN6) for x axis
       
       value = ATDDR0; // store digital value from accelerometer
       x = getAngleX(value);
     
+      outputAngleBCD(x);
       SCI_OutUDec(x);
       SCI_OutChar(CR);
+      
+      delay1ms(150);
     }
   }
   
@@ -136,6 +132,14 @@ int getAngleY(unsigned short y){
  return angle;
 }
 
+
+//Function for setting the LEDs to the BCD value of the angle
+void outputAngleBCD(unsigned int angle){
+  
+  PT1AD = angle%10; // the lower 4 bits, these represent the ones coloumn
+  PTP = angle/10; // the upper 4 bits, these represent the tens coloumn
+  
+}
 
 
 // Function for delay
@@ -200,7 +204,9 @@ interrupt  VectorNumber_Vtimch0 void ISR_Vtimch0(void)
   unsigned int temp;
   
   PTJ ^= 0x01;      //Toggles pin/LED state    
-
+  
+  xy_Toggle *=-1;
+  
   temp = TC0;       //Refer back to TFFCA, we enabled FastFlagClear, thus by reading the Timer Capture input we automatically clear the flag, allowing another TIC interrupt
 }
 
