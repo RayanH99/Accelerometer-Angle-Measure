@@ -7,13 +7,13 @@
 #include "SCI.h" // necessary for serial communication
 
 
-
 unsigned short value;
 unsigned int x;
 unsigned int y;
+
+//counters for mode and start/stop, used in interrupts
 unsigned int xyCounter;
-signed int xy_Toggle;
-signed int startStop_Toggle;
+unsigned int startStopCounter;
 
 // function prototypes
 void outputAngleBCD(unsigned int angle);
@@ -23,16 +23,16 @@ void setClk(void);
 
 void main(void) {
 
-  /*
- * The next six assignment statements configure the Timer Input Capture                                                   
- */           
+  
+  //The next six assignment statements configure the Timer Input Capture                                                  
+  // Edited to allow use of IOC0 and IOC2 (Dig Pins 3 and 7)          
   TSCR1 = 0x90;
   TSCR2 = 0x04;                   
-  TIOS = 0xFC;                   
-  PERT = 0x03;     
+  TIOS = 0xFA;                   
+  PERT = 0x05;     
   TCTL3 = 0x00;    
-  TCTL4 = 0x0A;    
-  TIE = 0x03;   //Timer Interrupt Enable        
+  TCTL4 = 0x22;    
+  TIE = 0x05;   //Timer Interrupt Enable        
   
 	EnableInterrupts; //CodeWarrior's method of enabling interrupts
  
@@ -55,7 +55,7 @@ void main(void) {
   DDRJ = 0xFF; 
   PTJ = 0x00; //start powered off to show that we are currently measuring along the x axis
   
-  // Configure PP0-PP7 Pin
+  // Configure PP0-PP3 Pin
   // Access using PTP to output
   DDRP = 0x0F;
   
@@ -69,40 +69,44 @@ void main(void) {
   SCI_OutString("Connection with PC has been established");
   SCI_OutChar(CR);
   
+  startStopCounter = 0;
   xyCounter = 0;
   
   while(1){
     
+    if(startStopCounter % 2 == 0){  // even number means start, odd number means stop 
     
-    if(xyCounter % 2 == 0){
+      if(xyCounter % 2 == 0){  // even number runs MODE 0, odd number runs MODE 1
 
-      ATDCTL5 = 0x26; // switch to channel 6 (AN6) for x axis
+        ATDCTL5 = 0x26; // switch to channel 6 (AN6) for x axis, MODE 0
+        
+        value = ATDDR0; // store accelerometer value
+        x = getAngleX(value);
       
-      value = ATDDR0; // store accelerometer value
-      x = getAngleX(value);
-    
-      outputAngleBCD(x);
-      SCI_OutUDec(x);
-      SCI_OutChar(CR);
-      //delay1ms(100);   
+        outputAngleBCD(x);
+        SCI_OutString("x angle = ");
+        SCI_OutUDec(x);
+        SCI_OutChar(CR);
+        delay1ms(110);   
+        
+      } else {
+                              
+        ATDCTL5 = 0x25; // switch to channel 5 (AN5) for y axis, MODE 1
+        
+        value = ATDDR0; // store accelerometer value
+        y = getAngleY(value);
       
-    } else {
-    
-
-                            
-      ATDCTL5 = 0x25; // switch to channel 5 (AN5) for y axis
+        outputAngleBCD(y);
+        SCI_OutString("y angle = ");
+        SCI_OutUDec(y);
+        SCI_OutChar(CR);
+        delay1ms(110);
+      }
       
-      value = ATDDR0; // store accelerometer value
-      y = getAngleY(value);
-    
-      outputAngleBCD(y);
-      SCI_OutUDec(y);
-      SCI_OutChar(CR);
-      //delay1ms(100);
     }
+    
   }
   
-
 
   for(;;) {
     _FEED_COP(); /* feeds the dog */
@@ -119,7 +123,12 @@ int getAngleX(unsigned short x){
  
  if(angle < 0){  
   angle = angle * -1;
+ } 
+ 
+ if (angle > 90){
+  angle = 90;
  }
+ 
  return angle;
 }
 
@@ -133,6 +142,11 @@ int getAngleY(unsigned short y){
  if(angle < 0){
   angle = angle * -1;
  }
+ 
+ if (angle > 90){
+  angle = 90;
+ }
+ 
  return angle;
 }
 
@@ -147,28 +161,22 @@ void outputAngleBCD(unsigned int angle){
 
 
 // Function for delay
-void delay1ms(unsigned int multiple){
+// Lazy delay function to waste time for 1ms. Avoids the use of the timer, which is being used elsewhere
+void delay1ms(unsigned int numTimes){
+  unsigned int i;
+  unsigned int j;
   
-  unsigned int i; //loop control variable
-  
-  TSCR1 = 0x90;   //enable timer and fast timer flag clear
-  
-  TSCR2 = 0x00;   //Disable timer interrupt, set prescaler=1
-  
-  TIOS |= 0x01;   //Enable OC0 (not necessary)
-  
-  TC0 = TCNT + 24000;
-   
-  for(i=0;i<multiple;i++) {
-    TFLG2 = 0x80; //clear the TOF flag
-    while (!(TFLG1_C0F));
-    TC0 += 24000;
-  }
-  
-  TIOS &= -0x01; //Disable OC0 (not necessary) 
-  
+  for(j = 0; j<numTimes; j++){
+    for(i = 0; i<68; i++){
+      // Delay
+      PTJ = PTJ;
+      PTJ = PTJ;
+      PTJ = PTJ;
+      PTJ = PTJ;
+      PTJ = PTJ;
+    }
+  }   
 }
-
 
 
 // Everything necessary for setting the clock speed
@@ -208,11 +216,23 @@ interrupt  VectorNumber_Vtimch0 void ISR_Vtimch0(void)
 
   unsigned int temp; //DON'T EDIT THIS
 
-  //xy_Toggle *= -1;
-
   xyCounter++;
   
   PTJ ^= 0x01; 
 
   temp = TC0;       //Refer back to TFFCA, we enabled FastFlagClear, thus by reading the Timer Capture input we automatically clear the flag, allowing another TIC interrupt
-  }
+}
+  
+   /*
+ * This is the Interrupt Service Routine for TIC channel 2 (Code Warrior has predefined the name for you as "Vtimch2"                                                    
+ */           
+interrupt  VectorNumber_Vtimch2 void ISR_Vtimch2(void)
+{
+  
+  unsigned int temp; //DON'T EDIT THIS
+  
+  startStopCounter++;
+  
+  temp = TC2;       //Refer back to TFFCA, we enabled FastFlagClear, thus by reading the Timer Capture input we automatically clear the flag, allowing another TIC interrupt
+}
+  
