@@ -42,13 +42,15 @@ void main(void) {
 	ATDCTL4 = 0x01;		// prescaler = 1; 4MHz / (2 * (1 + 1)) == 1MHz
 	ATDCTL5 = 0x25;		// continuous conversion on channel 6 (AN6)
 
+  // Set clock speed
+  setClk();
+  
   // Set baud rate based on student specifc bus speed(E-clock)
   // Our specific E-clock speed was 4 MHz
   // baud divisor = 4000000/(16 * 19200) = 13.02.. <- less than 5% error off nearest whole number
   SCI_Init(19200);
   
-  // Set clock speed
-  //setClk();
+
   
   
   //Configure on board LED as output, we will use this to show user if measuring x or y values
@@ -107,7 +109,6 @@ void main(void) {
     
   }
   
-
   for(;;) {
     _FEED_COP(); /* feeds the dog */
   } /* loop forever */
@@ -162,12 +163,13 @@ void outputAngleBCD(unsigned int angle){
 
 // Function for delay
 // Lazy delay function to waste time for 1ms. Avoids the use of the timer, which is being used elsewhere
+// edited to work for 4MHz
 void delay1ms(unsigned int numTimes){
   unsigned int i;
   unsigned int j;
   
   for(j = 0; j<numTimes; j++){
-    for(i = 0; i<68; i++){
+    for(i = 0; i<43; i++){
       // Delay
       PTJ = PTJ;
       PTJ = PTJ;
@@ -180,9 +182,9 @@ void delay1ms(unsigned int numTimes){
 
 
 // Everything necessary for setting the clock speed
-
+// DESCRIPTION: The following code is adapted from the ESDX User Guide and the Serial Monitor code (S12SerMon2r7) to set the clock speed to 24 MHz. 
 #define VCOFRQ 0x00        //VCOFRQ[1:0]  32MHz <= VCOCLK <= 48MHz
-#define SYNDIV 0x05        //SYNDIV[5:0]  Syn divide is 11
+#define SYNDIV 0x03        //SYNDIV[5:0]  Syn divide is 3
 #define REFFRQ 0x40        //REFFRQ[1:0]  2MHz < fREF <= 6MHz
 #define REFDIV 0x01        //REFDIV[3:0]  Ref Divide is 1
 
@@ -197,7 +199,7 @@ void setClk(void){
   
   CPMUSYNR=VCOFRQ + SYNDIV;      //Set Syn divide and selects VCO frequency range. fVCO = 48 MHz.
   
-  CPMUPOSTDIV=0x00;              //Set Post Divider (0x00= 0000 0000). fPLL= 48 MHz.
+  CPMUPOSTDIV=0x03;              //Set Post Divider (0x00= 0000 0000). fPLL= 48 MHz.
                                  //Overall clock speed is fBUS=fPLL/2=24 MHz  
   
   while (CPMUFLG_LOCK == 0) {}  //Wait for PLL to achieve desired tolerance of target frequency. NOTE: For use when the source clock is PLL. comment out when using external oscillator as source clock 
@@ -205,7 +207,6 @@ void setClk(void){
  CPMUPROT = 1;                  //Protection for clock configuration is reenabled 
   //Note: If you change your clock speed you will need to update delay1ms function to give a 1 ms delay
 }
-
 
 
 /*

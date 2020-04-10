@@ -42,11 +42,11 @@ void SCI_Init(unsigned short baudRate){
   SCI0BDH = 0;   // br=MCLK/(16*baudRate) 
   
   switch(baudRate){
-    case 2400:  SCI0BDL=163; break;
-    case 4800:  SCI0BDL=81;  break;
-    case 9600:  SCI0BDL=41;  break;
-    case 19200: SCI0BDL=20;  break;
-    case 38400: SCI0BDL=10;  break;
+    case 2400:  SCI0BDL=104; break;
+    case 4800:  SCI0BDL=89;  break;
+    case 9600:  SCI0BDL=26;  break;
+    case 19200: SCI0BDL=13;  break;
+    case 38400: SCI0BDL=7;  break;
     default:    SCI0BDL = 41 ;  // 9600 
   }
   SCI0CR1 = 0;
