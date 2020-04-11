@@ -19,7 +19,7 @@ unsigned int startStopCounter;
 void outputAngleBCD(unsigned int angle);
 void delay1ms(unsigned int multiple);
 void setClk(void);
-
+void SCI_OutCRLF(void);
 
 void main(void) {
 
@@ -88,8 +88,7 @@ void main(void) {
         outputAngleBCD(x);
         SCI_OutString("x angle = ");
         SCI_OutUDec(x);
-        SCI_OutChar(CR);
-        SCI_OutChar(LF);
+        SCI_OutCRLF();
         delay1ms(500);   
         
       } else {
@@ -102,8 +101,7 @@ void main(void) {
         outputAngleBCD(y);
         SCI_OutString("y angle = ");
         SCI_OutUDec(y);
-        SCI_OutChar(CR);
-        SCI_OutChar(LF);
+        SCI_OutCRLF();
         delay1ms(500);
       }
       
@@ -160,6 +158,12 @@ void outputAngleBCD(unsigned int angle){
   PT1AD = angle%10; // the lower 4 bits, these represent the ones coloumn
   PTP = angle/10; // the upper 4 bits, these represent the tens coloumn
   
+}
+
+// Function to output CRLF at the end of a line in the serial monitor
+void SCI_OutCRLF(void){   
+  SCI_OutChar(CR);
+  SCI_OutChar(LF);
 }
 
 

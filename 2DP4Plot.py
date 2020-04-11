@@ -18,7 +18,7 @@ def livePlot(i):
     graph.clear()
     graph.plot(yAxis, xAxis)
     graph.set_title("ADXL337 Acclerometer Angle with respect to Time")
-    graph.set_xlabel("Time")
+    graph.set_xlabel("Time (seconds/2)")
     graph.set_ylabel("Angle (degrees)")
 
 liveDisplay = animation.FuncAnimation(display, livePlot, interval = 500)
