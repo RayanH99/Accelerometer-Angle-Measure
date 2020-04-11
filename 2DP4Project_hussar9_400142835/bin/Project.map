@@ -32,7 +32,7 @@ _startupData is allocated at 0xC031 and uses 6 Bytes
 extern struct _tagStartup {
   unsigned nofZeroOut     1
   _Range   pZeroOut       0x1500     10
-  _Copy    *toCopyDownBeg 0xC53B
+  _Copy    *toCopyDownBeg 0xC540
 } _startupData;
 
 *********************************************************************************************
@@ -42,8 +42,8 @@ Section Name                    Size  Type     From       To       Segment
 .init                             49     R     0xC000     0xC030   ROM_C000
 .startData                        10     R     0xC031     0xC03A   ROM_C000
 .rodata1                          62     R     0xC03B     0xC078   ROM_C000
-.text                            599     R     0xC079     0xC2CF   ROM_C000
-.copy                              2     R     0xC53B     0xC53C   ROM_C000
+.text                            604     R     0xC079     0xC2D4   ROM_C000
+.copy                              2     R     0xC540     0xC541   ROM_C000
 .stack                           256   R/W     0x1400     0x14FF   RAM
 .abs_section_8                     1   N/I        0x8        0x8   .absSeg0
 .abs_section_9                     1   N/I        0x9        0x9   .absSeg1
@@ -321,11 +321,11 @@ Section Name                    Size  Type     From       To       Segment
 .abs_section_ffee                  2     R     0xFFEE     0xFFEF   .absSeg273
 .abs_section_ffea                  2     R     0xFFEA     0xFFEB   .absSeg274
 .common                           10   R/W     0x1500     0x1509   RAM
-RUNTIME                          619     R     0xC2D0     0xC53A   ROM_C000
+RUNTIME                          619     R     0xC2D5     0xC53F   ROM_C000
 .vectSeg275_vect                   2     R     0xFFFE     0xFFFF   .vectSeg275
 
 Summary of section sizes per section type:
-READ_ONLY (R):         543 (dec:     1347)
+READ_ONLY (R):         548 (dec:     1352)
 READ_WRITE (R/W):      10A (dec:      266)
 NO_INIT (N/I):         156 (dec:      342)
 
@@ -617,14 +617,14 @@ MODULE:                 -- mc9s12ga240.c.o --
      _CPMUIRCTRIM                               2F8       2       2       0   .abs_section_2f8
 MODULE:                 -- main.c.o --
 - PROCEDURES:
-     main                                      C079      A8     168       1   .text       
-     getAngleX                                 C121      62      98       1   .text       
-     getAngleY                                 C183      62      98       1   .text       
-     outputAngleBCD                            C1E5      15      21       2   .text       
-     delay1ms                                  C1FA      30      48       1   .text       
-     setClk                                    C22A      1F      31       1   .text       
-     ISR_Vtimch0                               C249      12      18       1   .text       
-     ISR_Vtimch2                               C25B       A      10       1   .text       
+     main                                      C079      AD     173       1   .text       
+     getAngleX                                 C126      62      98       1   .text       
+     getAngleY                                 C188      62      98       1   .text       
+     outputAngleBCD                            C1EA      15      21       2   .text       
+     delay1ms                                  C1FF      30      48       1   .text       
+     setClk                                    C22F      1F      31       1   .text       
+     ISR_Vtimch0                               C24E      12      18       1   .text       
+     ISR_Vtimch2                               C260       A      10       1   .text       
 - VARIABLES:
      STRING.Connection.with.PC.h.1             C03B      28      40       1   .rodata1    
      STRING.x.angle....2                       C063       B      11       1   .rodata1    
@@ -646,52 +646,52 @@ MODULE:                 -- Start12.c.o --
      __SEG_END_SSTACK                          1500       0       0       1               
 MODULE:                 -- FADD.C.o (ansis.lib) --
 - PROCEDURES:
-     F_ADDKL                                   C2D0      67     103       1   RUNTIME     
-     _FADD                                     C337      15      21       2   RUNTIME     
+     F_ADDKL                                   C2D5      67     103       1   RUNTIME     
+     _FADD                                     C33C      15      21       2   RUNTIME     
 - VARIABLES:
 MODULE:                 -- FCMP.C.o (ansis.lib) --
 - PROCEDURES:
-     _FCMP                                     C34C      26      38       2   RUNTIME     
+     _FCMP                                     C351      26      38       2   RUNTIME     
 - VARIABLES:
 MODULE:                 -- FCONV.C.o (ansis.lib) --
 - PROCEDURES:
-     F_TOLONGK                                 C372      33      51       1   RUNTIME     
-     F_FRLONGK                                 C3A5      1F      31       1   RUNTIME     
-     _FUFLOAT                                  C3C4      12      18       2   RUNTIME     
-     _FSTRUNC                                  C3D6      11      17       2   RUNTIME     
+     F_TOLONGK                                 C377      33      51       1   RUNTIME     
+     F_FRLONGK                                 C3AA      1F      31       1   RUNTIME     
+     _FUFLOAT                                  C3C9      12      18       2   RUNTIME     
+     _FSTRUNC                                  C3DB      11      17       2   RUNTIME     
 - VARIABLES:
 MODULE:                 -- FMUL.C.o (ansis.lib) --
 - PROCEDURES:
-     F_MULKL                                   C3E7      58      88       1   RUNTIME     
-     _FMUL                                     C43F      14      20       4   RUNTIME     
+     F_MULKL                                   C3EC      58      88       1   RUNTIME     
+     _FMUL                                     C444      14      20       4   RUNTIME     
 - VARIABLES:
 MODULE:                 -- FREGS.C.o (ansis.lib) --
 - PROCEDURES:
-     F_PULK                                    C453      15      21       3   RUNTIME     
-     F_PULL                                    C468      15      21       2   RUNTIME     
-     F_PSHK                                    C47D      13      19       3   RUNTIME     
-     F_XGKL                                    C490      21      33       2   RUNTIME     
-     F_CLRK                                    C4B1       B      11       2   RUNTIME     
-     F_MAXK                                    C4BC       9       9       1   RUNTIME     
-     F_NORMK                                   C4C5      3E      62       2   RUNTIME     
+     F_PULK                                    C458      15      21       3   RUNTIME     
+     F_PULL                                    C46D      15      21       2   RUNTIME     
+     F_PSHK                                    C482      13      19       3   RUNTIME     
+     F_XGKL                                    C495      21      33       2   RUNTIME     
+     F_CLRK                                    C4B6       B      11       2   RUNTIME     
+     F_MAXK                                    C4C1       9       9       1   RUNTIME     
+     F_NORMK                                   C4CA      3E      62       2   RUNTIME     
 - VARIABLES:
 MODULE:                 -- rtshc12.c.o (ansis.lib) --
 - PROCEDURES:
-     _NEG_P                                    C503       F      15       1   RUNTIME     
-     _CASE_SEARCH_BYTE                         C512      17      23       1   RUNTIME     
+     _NEG_P                                    C508       F      15       1   RUNTIME     
+     _CASE_SEARCH_BYTE                         C517      17      23       1   RUNTIME     
 - VARIABLES:
 MODULE:                 -- VREGS.C.o (ansis.lib) --
 - PROCEDURES:
-     L_NEGK                                    C529       7       7       1   RUNTIME     
-     L_PSHK                                    C530       8       8       1   RUNTIME     
-     UL_PULK                                   C538       3       3       1   RUNTIME     
+     L_NEGK                                    C52E       7       7       1   RUNTIME     
+     L_PSHK                                    C535       8       8       1   RUNTIME     
+     UL_PULK                                   C53D       3       3       1   RUNTIME     
 - VARIABLES:
 MODULE:                 -- SCI.C.o --
 - PROCEDURES:
-     SCI_Init                                  C265      33      51       1   .text       
-     SCI_OutChar                               C298       9       9       4   .text       
-     SCI_OutString                             C2A1       E      14       3   .text       
-     SCI_OutUDec                               C2AF      21      33       2   .text       
+     SCI_Init                                  C26A      33      51       1   .text       
+     SCI_OutChar                               C29D       9       9       5   .text       
+     SCI_OutString                             C2A6       E      14       3   .text       
+     SCI_OutUDec                               C2B4      21      33       2   .text       
 - VARIABLES:
 
 *********************************************************************************************
@@ -699,7 +699,7 @@ MODULE STATISTIC
   Name                                      Data   Code  Const
 ---------------------------------------------------------------------------------------------
   mc9s12ga240.c.o                            342      0      0
-  main.c.o                                    10    492     66
+  main.c.o                                    10    497     66
   Start12.c.o                                  0     49      0
   FADD.C.o (ansis.lib)                         0    124      0
   FCMP.C.o (ansis.lib)                         0     38      0
@@ -1565,39 +1565,39 @@ OBJECT LIST SORTED BY ADDRESS
      STRING.Connection.with.PC.h.1             C03B      28      40       1   .rodata1    
      STRING.x.angle....2                       C063       B      11       1   .rodata1    
      STRING.y.angle....3                       C06E       B      11       1   .rodata1    
-     main                                      C079      A8     168       1   .text       
-     getAngleX                                 C121      62      98       1   .text       
-     getAngleY                                 C183      62      98       1   .text       
-     outputAngleBCD                            C1E5      15      21       2   .text       
-     delay1ms                                  C1FA      30      48       1   .text       
-     setClk                                    C22A      1F      31       1   .text       
-     ISR_Vtimch0                               C249      12      18       1   .text       
-     ISR_Vtimch2                               C25B       A      10       1   .text       
-     SCI_Init                                  C265      33      51       1   .text       
-     SCI_OutChar                               C298       9       9       4   .text       
-     SCI_OutString                             C2A1       E      14       3   .text       
-     SCI_OutUDec                               C2AF      21      33       2   .text       
-     F_ADDKL                                   C2D0      67     103       1   RUNTIME     
-     _FADD                                     C337      15      21       2   RUNTIME     
-     _FCMP                                     C34C      26      38       2   RUNTIME     
-     F_TOLONGK                                 C372      33      51       1   RUNTIME     
-     F_FRLONGK                                 C3A5      1F      31       1   RUNTIME     
-     _FUFLOAT                                  C3C4      12      18       2   RUNTIME     
-     _FSTRUNC                                  C3D6      11      17       2   RUNTIME     
-     F_MULKL                                   C3E7      58      88       1   RUNTIME     
-     _FMUL                                     C43F      14      20       4   RUNTIME     
-     F_PULK                                    C453      15      21       3   RUNTIME     
-     F_PULL                                    C468      15      21       2   RUNTIME     
-     F_PSHK                                    C47D      13      19       3   RUNTIME     
-     F_XGKL                                    C490      21      33       2   RUNTIME     
-     F_CLRK                                    C4B1       B      11       2   RUNTIME     
-     F_MAXK                                    C4BC       9       9       1   RUNTIME     
-     F_NORMK                                   C4C5      3E      62       2   RUNTIME     
-     _NEG_P                                    C503       F      15       1   RUNTIME     
-     _CASE_SEARCH_BYTE                         C512      17      23       1   RUNTIME     
-     L_NEGK                                    C529       7       7       1   RUNTIME     
-     L_PSHK                                    C530       8       8       1   RUNTIME     
-     UL_PULK                                   C538       3       3       1   RUNTIME     
+     main                                      C079      AD     173       1   .text       
+     getAngleX                                 C126      62      98       1   .text       
+     getAngleY                                 C188      62      98       1   .text       
+     outputAngleBCD                            C1EA      15      21       2   .text       
+     delay1ms                                  C1FF      30      48       1   .text       
+     setClk                                    C22F      1F      31       1   .text       
+     ISR_Vtimch0                               C24E      12      18       1   .text       
+     ISR_Vtimch2                               C260       A      10       1   .text       
+     SCI_Init                                  C26A      33      51       1   .text       
+     SCI_OutChar                               C29D       9       9       5   .text       
+     SCI_OutString                             C2A6       E      14       3   .text       
+     SCI_OutUDec                               C2B4      21      33       2   .text       
+     F_ADDKL                                   C2D5      67     103       1   RUNTIME     
+     _FADD                                     C33C      15      21       2   RUNTIME     
+     _FCMP                                     C351      26      38       2   RUNTIME     
+     F_TOLONGK                                 C377      33      51       1   RUNTIME     
+     F_FRLONGK                                 C3AA      1F      31       1   RUNTIME     
+     _FUFLOAT                                  C3C9      12      18       2   RUNTIME     
+     _FSTRUNC                                  C3DB      11      17       2   RUNTIME     
+     F_MULKL                                   C3EC      58      88       1   RUNTIME     
+     _FMUL                                     C444      14      20       4   RUNTIME     
+     F_PULK                                    C458      15      21       3   RUNTIME     
+     F_PULL                                    C46D      15      21       2   RUNTIME     
+     F_PSHK                                    C482      13      19       3   RUNTIME     
+     F_XGKL                                    C495      21      33       2   RUNTIME     
+     F_CLRK                                    C4B6       B      11       2   RUNTIME     
+     F_MAXK                                    C4C1       9       9       1   RUNTIME     
+     F_NORMK                                   C4CA      3E      62       2   RUNTIME     
+     _NEG_P                                    C508       F      15       1   RUNTIME     
+     _CASE_SEARCH_BYTE                         C517      17      23       1   RUNTIME     
+     L_NEGK                                    C52E       7       7       1   RUNTIME     
+     L_PSHK                                    C535       8       8       1   RUNTIME     
+     UL_PULK                                   C53D       3       3       1   RUNTIME     
      _Vector_10                                FFEA       2       2       0   .abs_section_ffea
      _Vector_8                                 FFEE       2       2       0   .abs_section_ffee
 
@@ -1631,7 +1631,7 @@ rtshc12.c.o (ansis.lib):
 *********************************************************************************************
 COPYDOWN SECTION
 ---------------------------------------------------------------------------------------------
-------- ROM-ADDRESS: 0xC53B ---- SIZE       2 ---
+------- ROM-ADDRESS: 0xC540 ---- SIZE       2 ---
 Filling bytes inserted
  0000
 
@@ -1786,6 +1786,6 @@ STATISTIC SECTION
 
 ExeFile:
 --------
-Number of blocks to be downloaded: 9
-Total size of all blocks to be downloaded: 1347
+Number of blocks to be downloaded: 8
+Total size of all blocks to be downloaded: 1352
 

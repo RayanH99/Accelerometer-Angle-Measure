@@ -89,7 +89,8 @@ void main(void) {
         SCI_OutString("x angle = ");
         SCI_OutUDec(x);
         SCI_OutChar(CR);
-        delay1ms(110);   
+        SCI_OutChar(LF);
+        delay1ms(500);   
         
       } else {
                               
@@ -102,7 +103,8 @@ void main(void) {
         SCI_OutString("y angle = ");
         SCI_OutUDec(y);
         SCI_OutChar(CR);
-        delay1ms(110);
+        SCI_OutChar(LF);
+        delay1ms(500);
       }
       
     }
