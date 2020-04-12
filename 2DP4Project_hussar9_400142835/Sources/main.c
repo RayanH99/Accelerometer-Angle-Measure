@@ -175,7 +175,7 @@ void delay1ms(unsigned int numTimes){
   unsigned int j;
   
   for(j = 0; j<numTimes; j++){
-    for(i = 0; i<43; i++){
+    for(i = 0; i<44; i++){
       // Delay
       PTJ = PTJ;
       PTJ = PTJ;
