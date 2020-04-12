@@ -19,7 +19,7 @@ def livePlot(i):
 
     graph.clear()
     graph.plot(yAxis, xAxis)
-    graph.set_title("ADXL337 Acclerometer Angle with respect to Time")
+    graph.set_title("ADXL337 Accelerometer Angle with respect to Time")
     graph.set_xlabel("Time (seconds/2)") ## sampling every half second
     graph.set_ylabel("Angle (degrees)")
 
